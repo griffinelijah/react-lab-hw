@@ -13,7 +13,7 @@ function PlantList(props){
 	            <Card.Description>{plant.origin}</Card.Description>
 	          </Card.Content>
 	          <Card.Content extra>
-	            <Button>Delete Plant</Button>
+	            <Button onClick={() => props.deletePlant(plant.id)}>Delete Plant</Button>
 	            <Button>Edit Plant</Button>
 	          </Card.Content>
 	        </Card>
