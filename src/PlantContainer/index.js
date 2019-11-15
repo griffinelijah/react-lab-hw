@@ -2,12 +2,20 @@ import React, { Component } from 'react';
 import PlantList from '../PlantList'
 import CreatePlantForm from '../CreatePlantForm'
 import { Grid } from 'semantic-ui-react';
+import EditPlantModal from '../EditPlantModal'
 
 class PlantContainer extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
-			plants: []
+			plants: [], 
+			editModalOpen: false,
+			plantToEdit: {
+				name: '',
+				alias: '',
+				orign: '',
+				id: ''
+			}
 		}
 	}
 	componentDidMount(){
@@ -18,14 +26,12 @@ class PlantContainer extends Component {
 			const plants = await fetch(process.env.REACT_APP_API_URL  + '/api/v1/plants/');
 			const parsedPlants = await plants.json();
 			console.log(parsedPlants);
-			this.setState({
-				plants: parsedPlants.data
-			})
 		} catch(err){
 			console.log(err);
 		}
 	}
-	addPlant = async(e, plantFromTheForm) => {
+
+	addPlant = async (e, plantFromTheForm) => {
 		e.preventDefault()
 		try{
 			const createdPlantRes = await fetch(process.env.REACT_APP_API_URL + '/api/v1/plants/', {
@@ -44,22 +50,89 @@ class PlantContainer extends Component {
 	}
 	deletePlant = async (id) => {
 		const deletePlantRes = await fetch(process.env.REACT_APP_API_URL + '/api/v1/plants/' + id, {method: 'DELETE'});
-		const deletePlantParsed = await  deletePlantRes.json();
+		const deletePlantParsed = await deletePlantRes.json();
 		this.setState({plants: this.state.plants.filter((plant) => plant.id !== id)})
-		console.log(deletePlantParsed, 'Response from flask server');
+		// console.log(deletePlantParsed, 'Response from flask server');
+	}
+
+	editPlant = (idOfPlantToEdit) => {
+		const plantToEdit = this.state.plants.find(plant => plant.id === idOfPlantToEdit)
+		this.setState({
+			editModalOpen: true,
+			plantToEdit: {
+				...plantToEdit
+			}
+		})
+	}
+	handleEditChange = (e) => {
+		this.setState({
+			plantToEdit: {
+				...this.state.plantToEdit,
+				[e.target.name]: e.target.value
+			}
+		})
+	}
+	
+	updatePlant = async (e) => {
+		e.preventDefault()
+		try{
+			const url = process.env.REACT_APP_API_URL + '/api/v1/plants/' + this.state.plantToEdit.id
+			const updatedRes = await fetch(url, {
+				method: 'PUT',
+				body: JSON.stringify(this.state.plantToEdit),
+				headers: {
+					'Content-Type': 'application/json'
+				}
+
+			})
+			const updatedResParsed = await updatedRes.json()
+			const newPlantArrWithUpdate = this.state.plants.map((plant) => {
+				if(plant.id === updatedResParsed.data.id){
+					plant = updatedResParsed.data
+				}
+				return plant
+			})
+			this.setState({
+				plants: newPlantArrWithUpdate
+			})
+			this.closeModal()
+		} catch (err){
+			console.log(err);
+		}
+	}
+	closeModal = () => {
+		this.setState({
+			editModalOpen: false
+		})
 	}
 	render(){
 		return (
-			<Grid columns={2} divided textAlign='center' style={{ height: '100%' }} verticalAlign='top' stackable>
-		        <Grid.Row>
-		          <Grid.Column >
-		            <PlantList plants={this.state.plants} deletePlant={this.deletePlant} />
-		          </Grid.Column>
-		          <Grid.Column >
-		           <CreatePlantForm addPlant={this.addPlant}/>
-		          </Grid.Column>
-		        </Grid.Row>
-		      </Grid>
+			<Grid columns={2} 
+		    divided textAlign='center' 
+		    style={{ height: '100%' }} 
+		    verticalAlign='top' 
+		    stackable
+		    >
+	        <Grid.Row>
+	          <Grid.Column >
+	            <PlantList 
+	            plants={this.state.plants} 
+	            deletePlant={this.deletePlant} 
+	            editPlant={this.editPlant}
+	            />
+	          </Grid.Column>
+	          <Grid.Column >
+	           <CreatePlantForm addPlant={this.addPlant}/>
+	          </Grid.Column>
+	          	<EditPlantModal
+	          	open={this.state.editModalOpen}
+	          	updatePlant={this.updatePlant}
+	          	plantToEdit={this.state.plantToEdit}
+	          	closeModal={this.closeModal}
+	          	handleEditChange={this.handleEditChange}
+	          	/>
+	        </Grid.Row>
+        </Grid>
 		)
 	}
 }

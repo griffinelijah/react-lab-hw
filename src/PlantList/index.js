@@ -14,7 +14,7 @@ function PlantList(props){
 	          </Card.Content>
 	          <Card.Content extra>
 	            <Button onClick={() => props.deletePlant(plant.id)}>Delete Plant</Button>
-	            <Button>Edit Plant</Button>
+	            <Button onClick={() => props.editPlant(plant.id)}>Edit Plant</Button>
 	          </Card.Content>
 	        </Card>
 			)

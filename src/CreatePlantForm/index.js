@@ -27,7 +27,7 @@ class CreatePlant extends Component {
 					<Button type='Submit'>Create Plant</Button>
 				</Form>
 			</Segment>
-			)
+		)
 	}
 }
 
