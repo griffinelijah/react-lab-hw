@@ -23,7 +23,10 @@ class PlantContainer extends Component {
 	}
 	getPlants = async () => {
 		try {
-			const plants = await fetch(process.env.REACT_APP_API_URL  + '/api/v1/plants/');
+			const plants = await fetch(process.env.REACT_APP_API_URL  + '/api/v1/plants/' ,
+			{
+				credentials: 'include'
+			});
 			const parsedPlants = await plants.json();
 			console.log(parsedPlants);
 		} catch(err){
@@ -36,6 +39,7 @@ class PlantContainer extends Component {
 		try{
 			const createdPlantRes = await fetch(process.env.REACT_APP_API_URL + '/api/v1/plants/', {
 				method: 'POST',
+				credentials: 'include',
 				body: JSON.stringify(plantFromTheForm),
 				headers: {
 					'Content-Type': 'application/json'
@@ -49,7 +53,7 @@ class PlantContainer extends Component {
 		}	
 	}
 	deletePlant = async (id) => {
-		const deletePlantRes = await fetch(process.env.REACT_APP_API_URL + '/api/v1/plants/' + id, {method: 'DELETE'});
+		const deletePlantRes = await fetch(process.env.REACT_APP_API_URL + '/api/v1/plants/' + id, {method: 'DELETE', credentials: 'include'});
 		const deletePlantParsed = await deletePlantRes.json();
 		this.setState({plants: this.state.plants.filter((plant) => plant.id !== id)})
 		// console.log(deletePlantParsed, 'Response from flask server');
@@ -79,6 +83,7 @@ class PlantContainer extends Component {
 			const url = process.env.REACT_APP_API_URL + '/api/v1/plants/' + this.state.plantToEdit.id
 			const updatedRes = await fetch(url, {
 				method: 'PUT',
+				credentials: 'include',
 				body: JSON.stringify(this.state.plantToEdit),
 				headers: {
 					'Content-Type': 'application/json'
